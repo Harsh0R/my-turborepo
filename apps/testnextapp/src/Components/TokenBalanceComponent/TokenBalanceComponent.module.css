@@ -1,0 +1,44 @@
+import React, { useContext, useEffect, useState } from 'react';
+import { SwapContext } from './SwapProvider';
+
+const TokenBalanceComponent = () => {
+  const { account, getTokenAddress, getaTokenBalance } = useContext(SwapContext);
+  const [loading, setLoading] = useState(true);
+  const [tokenBalances, setTokenBalances] = useState([]);
+
+  useEffect(() => {
+    const fetchTokenBalances = async () => {
+      setLoading(true);
+      if (account) {
+        const tokens = ['ETH', 'COIN_1', 'COIN_2', 'COIN_3', 'COIN_4', 'COIN_5', 'COIN_6', 'COIN_7', 'COIN_8'];
+        const balances = await Promise.all(tokens.map(async token => {
+          const tokenAddress = await getTokenAddress(token);
+          const balance = await getaTokenBalance(tokenAddress, account);
+          return { token, balance };
+        }));
+        setTokenBalances(balances);
+      }
+      setLoading(false);
+    };
+    fetchTokenBalances();
+  }, [account, getTokenAddress, getaTokenBalance]);
+
+  return (
+    <div>
+      <h2>Token Balances</h2>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul>
+          {tokenBalances.map(({ token, balance }) => (
+            <li key={token}>
+              <strong>{token}: </strong> {balance}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default TokenBalanceComponent;
